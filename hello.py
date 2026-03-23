@@ -7,3 +7,5 @@ hello = "привет"
 name = "Аида"
 
 print(f"{hello}, меня зовут" + name)
+
+# 
