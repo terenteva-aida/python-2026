@@ -29,8 +29,8 @@ total = sum(dict.values())  #sum - функция суммирования, .val
 
 print("Общее количество гласных букв в тексте:", total)
 print("\nСтатистика по каждой гласной букве:")
-#.items - возвращает коллекцию пар (кортежей), sorted - сортирует пары по первому элементу, переменные создаются автоматически на ходу
-for letter, colicestvo in sorted(dict.items()):
+#.items - возвращает коллекцию пар (кортежей), переменные создаются автоматически на ходу
+for letter, colicestvo in dict.items():
     print(f" '{letter}' : {colicestvo} ")
 
 if total == 0:
