@@ -7,17 +7,22 @@ page = {"title": "Тег BODY",
         "p": "Ut wisis enim ad minim veniam,  suscipit lobortis nisl ut aliquip ex ea commodo consequat."}
 
 
-template = """ 
+template = f""" 
 <!DOCTYPE HTML>
 <html>
  <head>
-  <title> ? </title>
-  <meta charset=?>
+  <title> {page["title"]} </title>
+  <meta charset="{page["charset"]}>
  </head>
- <body onload="alert(?)">
+ <body onload="alert('{page["alert"]}')">
  
-  <p>?</p>
+  <p>{page["p"]}</p>
 
  </body>
 </html>
 """
+
+with open(r'C:/Users/User/OneDrive/Рабочий стол/Python/repo/Homework/index.html', "w", encoding="utf-8") as file:
+    file.write(template)
+
+print("Файл успешно создан!")
