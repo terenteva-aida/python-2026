@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create an account / Login</title>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+
+    <!-- Переключатель режимов -->
+    <div>
+        <span id="registerMode" style="cursor:pointer; font-weight:bold;">Create an account</span> | 
+        <span id="loginMode" style="cursor:pointer;">Login</span>
+    </div>
+
+    <!-- Единая форма, её action и кнопка будут меняться -->
+    <form id="mainForm" method="post">
+        <div>
+            <label>Login: <input type="text" name="login" required /></label>
+        </div>
+        <div>
+            <label>Password: <input type="password" name="passwd" required /></label>
+        </div>
+        <div>
+            <input type="submit" value="Subscribe" id="submitBtn" />
+        </div>
+    </form>
+
+    <hr>
+
+    <!-- Список аккаунтов (остаётся всегда) -->
+    <h2>Existing accounts</h2>
+    <ul>
+        {% for item in data %}
+            <li>
+                {{ item[1] }}
+                <a href="/api/v1/account/{{ item[0] }}">X</a>
+                <a href="/api/account/{{ item[0] }}/">Подробнее</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        const registerSpan = document.getElementById('registerMode');
+        const loginSpan = document.getElementById('loginMode');
+        const mainForm = document.getElementById('mainForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Функция обновления формы
+        function setMode(mode) {
+            if (mode === 'register') {
+                mainForm.action = '/api/v1/account';   // эндпоинт регистрации
+                submitBtn.value = 'Subscribe';
+                registerSpan.style.fontWeight = 'bold';
+                loginSpan.style.fontWeight = 'normal';
+            } else {
+                mainForm.action = '/api/v1/login';      // эндпоинт входа
+                submitBtn.value = 'Login';
+                loginSpan.style.fontWeight = 'bold';
+                registerSpan.style.fontWeight = 'normal';
+            }
+        }
+
+        registerSpan.onclick = () => setMode('register');
+        loginSpan.onclick = () => setMode('login');
+
+        // Устанавливаем начальный режим (регистрация)
+        setMode('register');
+    </script>
+</body>
+</html>
