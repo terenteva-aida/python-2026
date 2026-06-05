@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обработчик промптов и файлов</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: 600;
+            margin-top: 15px;
+            display: block;
+            color: #2c3e50;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        input[type="file"] {
+            margin-top: 8px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            width: 100%;
+        }
+        button {
+            margin-top: 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        #result {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border-left: 5px solid #3498db;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 13px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .file-info {
+            background: #eef2f7;
+            padding: 8px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+        hr {
+            margin: 20px 0;
+        }
+        .spinner {
+            display: none;
+            margin-left: 15px;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📄 Обработка промпта и файлов</h1>
+    <form id="uploadForm">
+        <label for="prompt">Текстовый промпт (запрос):</label>
+        <textarea id="prompt" name="prompt" rows="4" placeholder="Введите ваш запрос..."></textarea>
+
+        <label for="files">Выберите файлы (.txt, .csv, .json, .pdf):</label>
+        <input type="file" id="files" name="files" multiple accept=".txt,.csv,.json,.pdf">
+
+        <button type="submit" id="submitBtn">🚀 Отправить</button>
+        <div id="loading" class="spinner" style="display: none;"></div>
+    </form>
+
+    <div id="result">
+        <strong>Результат обработки:</strong><br>
+        Здесь отобразится ответ сервера...
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('uploadForm');
+    const resultDiv = document.getElementById('result');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingSpinner = document.getElementById('loading');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Показать индикатор загрузки
+        submitBtn.disabled = true;
+        loadingSpinner.style.display = 'inline-block';
+        resultDiv.innerHTML = '<strong>Результат обработки:</strong><br>⏳ Отправка данных...';
+
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch('/process', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Ошибка сервера');
+            }
+
+            const data = await response.json();
+
+            // Формируем вывод
+            let html = `<strong>Результат обработки:</strong><br>
+                        <strong>Статус:</strong> ${data.status}<br>
+                        <strong>Промпт:</strong> ${escapeHtml(data.prompt) || '(пусто)'}<br>
+                        <strong>Сообщение:</strong> ${escapeHtml(data.message)}<br><br>
+                        <strong>Обработанные файлы:</strong><br>`;
+
+            if (data.processed_files && data.processed_files.length > 0) {
+                data.processed_files.forEach(file => {
+                    html += `<div class="file-info">
+                                <strong>📎 ${escapeHtml(file.filename)}</strong> (тип: ${file.type})<br>
+                                <details>
+                                    <summary>Предпросмотр содержимого</summary>
+                                    <pre style="margin-top: 8px; background:white; padding:8px; border-radius:4px;">${escapeHtml(file.content_preview)}</pre>
+                                </details>
+                             </div>`;
+                });
+            } else {
+                html += `<em>Нет обработанных файлов</em>`;
+            }
+
+            resultDiv.innerHTML = html;
+
+        } catch (error) {
+            resultDiv.innerHTML = `<strong>❌ Ошибка:</strong> ${escapeHtml(error.message)}`;
+        } finally {
+            submitBtn.disabled = false;
+            loadingSpinner.style.display = 'none';
+        }
+    });
+
+    // Простая защита от XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+</script>
+</body>
+</html>
