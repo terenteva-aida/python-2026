@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Исследование темперамента | Тест по Айзенку</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #1e4a3a; /* тёмно-зелёный фон */
+            color: #1e2a3a;
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #1e293b;
+            color: white;
+            padding: 2rem 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .instruction {
+            background: #f8fafc;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 6px solid #e67e22;
+        }
+
+        .instruction h2 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 1rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #e67e22;
+            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.2);
+        }
+
+        button {
+            background: #e74c3c;   /* красный цвет */
+            color: white;
+            font-weight: 700;
+            border: none;
+            padding: 0.85rem 1.8rem;
+            border-radius: 2rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.25s, transform 0.1s;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            background: #c0392b;
+            transform: scale(0.98);
+        }
+
+        hr {
+            margin: 1.5rem 0;
+            border: none;
+            height: 2px;
+            background: #e2e8f0;
+        }
+
+        @media (max-width: 550px) {
+            .content { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Исследование темперамента</h1>
+        <p>Тест по модели Ганса Айзенка. Этот тест поможет определить ваш темперамент по модели Ганса Айзенка — одной из самых известных психологических методик. Темперамент — это врожденные особенности вашей нервной системы, которые влияют на скорость реакций, эмоциональность, общительность и устойчивость к стрессу.</p>
+    </div>
+
+    <div class="content">
+        <div class="instruction">
+            <h2>Как пройти тест?</h2>
+            <p>Инструкция: вы — путешественник, потерпевший кораблекрушение. Волны выбросили вас на берег неизвестного острова. Чтобы выбраться, нужно понять себя. Каждый ваш ответ — шаг к разгадке. Вам встретятся 7 ситуаций, на каждую нужно выбрать один из вариантов поведения. Отвечайте интуитивно, без долгих раздумий. В конце вы узнаете свой темперамент.</p>
+            <hr>
+        </div>
+
+        <form method="post" action="/start">
+            <div class="form-group">
+                <label>Ваше имя</label>
+                <input type="text" name="name" required placeholder=" ">
+            </div>
+            <div class="form-group">
+                <label>Пол</label>
+                <select name="gender">
+                    <option value="женский">Женский</option>
+                    <option value="мужской">Мужской</option>
+                    <option value="другой">Другой</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Возраст (необязательно)</label>
+                <input type="number" name="age" placeholder="лет">
+            </div>
+            <button type="submit">Начать тест</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

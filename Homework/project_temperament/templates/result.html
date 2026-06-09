@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ваш темперамент | Исследование темперамента</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #1e4a3a;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+        .result-card {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 2rem;
+            overflow: hidden;
+            box-shadow: 0 30px 45px -20px rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            padding: 2rem 2rem 0.5rem;
+            background: #ffffff;
+        }
+        .greeting {
+            font-size: 1.9rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+        .temper-badge {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            background: #f1f5f9;
+            border-left: 4px solid;
+        }
+        .stats {
+            background: #f8fafc;
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            flex: 0 1 200px;
+            background: white;
+            border-radius: 1.2rem;
+            padding: 0.8rem;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-bottom: 3px solid;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-top: 0.25rem;
+        }
+        .chart-container {
+            padding: 1rem 2rem;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+        }
+        canvas {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            background: #fefefe;
+            border-radius: 1.2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .description {
+            padding: 0 2rem 1.5rem;
+        }
+        .description h3 {
+            font-weight: 700;
+            margin: 1rem 0 0.5rem;
+            font-size: 1.4rem;
+        }
+        .description p {
+            margin-bottom: 0.8rem;
+            line-height: 1.5;
+            color: #1e293b;
+            text-align: justify;
+        }
+        .traits-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 0.5rem 0 1rem;
+        }
+        .trait {
+            background: #f1f5f9;
+            padding: 0.25rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .action {
+            padding: 0 2rem 2rem;
+            text-align: center;
+        }
+        .btn {
+            color: white;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            border-radius: 2.5rem;
+            transition: background 0.2s, transform 0.1s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            transform: scale(0.97);
+            filter: brightness(1.05);
+        }
+        hr {
+            margin: 1rem 0;
+            border: none;
+            height: 1px;
+            background: #e2e8f0;
+        }
+        @media (max-width: 600px) {
+            .header, .description, .action { padding-left: 1.2rem; padding-right: 1.2rem; }
+            .greeting { font-size: 1.5rem; }
+            .temper-badge { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="result-card" id="resultCard">
+    <div class="header">
+        <div class="greeting">
+            {% if result.gender == 'мужской' %}Уважаемый{% elif result.gender == 'женский' %}Уважаемая{% else %}Уважаемый(ая){% endif %}
+            <span id="userName">{{ result.name }}</span>
+        </div>
+        <div class="temper-badge" id="temperBadge">
+            Ваш темперамент — <strong>{{ result.temperament }}</strong>
+        </div>
+        <div class="stats">
+            <div class="stat-box" id="statE">
+                <div class="stat-value">{{ result.e_total }}</div>
+                <div class="stat-label">Экстраверсия (E)</div>
+            </div>
+            <div class="stat-box" id="statN">
+                <div class="stat-value">{{ result.n_total }}</div>
+                <div class="stat-label">Нейротизм (N)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="eysenckCanvas" width="600" height="600" style="width:100%; max-width:600px; height:auto; aspect-ratio:1/1"></canvas>
+    </div>
+
+    <div class="description">
+        <h3>Что означает ваш темперамент?</h3>
+        {% if result.temperament == 'Сангвиник' %}
+            <p><strong>Сангвиник</strong> — сильный, уравновешенный, подвижный тип. Вы жизнерадостны, энергичны, быстро адаптируетесь к новым условиям. Легко переживаете неудачи, общительны, оптимистичны.</p>
+            <div class="traits-list">
+                <span class="trait">+ Общительный</span>
+                <span class="trait">+ Оптимист</span>
+                <span class="trait">+ Отзывчивый</span>
+                <span class="trait">+ Активный</span>
+                <span class="trait">− Поверхностность</span>
+                <span class="trait">− Непостоянство</span>
+            </div>
+            <p><strong>Рекомендации:</strong> Вам подходит работа, требующая быстрых реакций и общения (продажи, педагогика, журналистика). Старайтесь доводить дела до конца и развивать усидчивость.</p>
+            <p><strong>Известные сангвиники:</strong> Вольфганг Амадей Моцарт, Наполеон Бонапарт, Мария Кюри.</p>
+        {% elif result.temperament == 'Холерик' %}
+            <p><strong>Холерик</strong> — сильный, неуравновешенный, подвижный тип. Вы страстны, решительны, энергичны. Быстро принимаете решения, но можете быть вспыльчивы и резки. Лидерские качества выражены.</p>
+            <div class="traits-list">
+                <span class="trait">+ Энергичный</span>
+                <span class="trait">+ Целеустремлённый</span>
+                <span class="trait">+ Лидер</span>
+                <span class="trait">+ Страстный</span>
+                <span class="trait">− Вспыльчивость</span>
+                <span class="trait">− Нетерпеливость</span>
+            </div>
+            <p><strong>Рекомендации:</strong> Вам подходят руководящие должности, предпринимательство, спорт. Учитесь контролировать эмоции и прислушиваться к другим.</p>
+            <p><strong>Известные холерики:</strong> Александр Суворов, Петр I, Стив Джобс.</p>
+        {% elif result.temperament == 'Флегматик' %}
+            <p><strong>Флегматик</strong> — сильный, уравновешенный, инертный тип. Вы спокойны, невозмутимы, терпеливы. Предпочитаете стабильность, медленны, но основательны. Вас трудно вывести из равновесия.</p>
+            <div class="traits-list">
+                <span class="trait">+ Надёжный</span>
+                <span class="trait">+ Спокойный</span>
+                <span class="trait">+ Усидчивый</span>
+                <span class="trait">+ Миролюбивый</span>
+                <span class="trait">− Инертность</span>
+                <span class="trait">− Эмоциональная холодность</span>
+            </div>
+            <p><strong>Рекомендации:</strong> Вам подходит монотонная работа, требующая внимания (бухгалтерия, программирование, научная деятельность). Старайтесь иногда проявлять инициативу.</p>
+            <p><strong>Известные флегматики:</strong> Иммануил Кант, Михаил Кутузов, Антон Чехов.</p>
+        {% else %}
+            <p><strong>Меланхолик</strong> — слабый, неуравновешенный, инертный тип. Вы глубоки, чувствительны, творчески одарены. Склонны к рефлексии, тревожности, но обладаете богатым внутренним миром и эмпатией.</p>
+            <div class="traits-list">
+                <span class="trait">+ Глубокий</span>
+                <span class="trait">+ Творческий</span>
+                <span class="trait">+ Эмпатичный</span>
+                <span class="trait">+ Ответственный</span>
+                <span class="trait">− Тревожность</span>
+                <span class="trait">− Ранимость</span>
+            </div>
+            <p><strong>Рекомендации:</strong> Вам подходят творческие профессии (писатель, художник, психолог). Важно избегать перегрузок и учиться справляться со стрессом.</p>
+            <p><strong>Известные меланхолики:</strong> Фёдор Достоевский, Альберт Эйнштейн, Сильвия Плат.</p>
+        {% endif %}
+        <hr>
+        <p style="font-size:0.85rem; text-align:center;">Темперамент не определяет вашу судьбу, а лишь указывает на врождённые особенности. Вы можете развивать любые качества.</p>
+    </div>
+
+    <div class="action">
+        <a href="/" class="btn" id="restartBtn">Пройти тест заново</a>
+    </div>
+</div>
+
+<script>
+    const temperament = "{{ result.temperament }}";
+    const eScore = parseInt("{{ result.e_total }}");
+    const nScore = parseInt("{{ result.n_total }}");
+
+    let mainColor = "#1e293b";
+    if (temperament === "Холерик") mainColor = "#e74c3c";
+    else if (temperament === "Сангвиник") mainColor = "#f1c40f";
+    else if (temperament === "Флегматик") mainColor = "#2ecc71";
+    else if (temperament === "Меланхолик") mainColor = "#3498db";
+
+    document.getElementById("resultCard").style.borderTop = `8px solid ${mainColor}`;
+    document.getElementById("temperBadge").style.borderLeftColor = mainColor;
+    document.getElementById("statE").style.borderBottomColor = mainColor;
+    document.getElementById("statN").style.borderBottomColor = mainColor;
+    document.getElementById("restartBtn").style.backgroundColor = mainColor;
+    document.getElementById("userName").style.color = mainColor;
+
+    function drawEysenckCircle() {
+        const canvas = document.getElementById('eysenckCanvas');
+        const ctx = canvas.getContext('2d');
+        const size = 600;
+        canvas.width = size;
+        canvas.height = size;
+        const margin = 85;
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const qWidth = centerX - margin;
+        const qHeight = centerY - margin;
+
+        ctx.clearRect(0, 0, size, size);
+
+        // Устанавливаем центрирование для всего текста
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Подсветка квадранта
+        ctx.fillStyle = mainColor + '20';
+        ctx.beginPath();
+        if (temperament === "Холерик") {
+            ctx.rect(centerX, margin, qWidth, qHeight);
+        } else if (temperament === "Сангвиник") {
+            ctx.rect(centerX, centerY, qWidth, qHeight);
+        } else if (temperament === "Флегматик") {
+            ctx.rect(margin, centerY, qWidth, qHeight);
+        } else if (temperament === "Меланхолик") {
+            ctx.rect(margin, margin, qWidth, qHeight);
+        }
+        ctx.fill();
+
+        // Оси
+        ctx.beginPath();
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 2;
+        ctx.moveTo(margin, centerY);
+        ctx.lineTo(size - margin, centerY);
+        ctx.stroke();
+        ctx.moveTo(centerX, margin);
+        ctx.lineTo(centerX, size - margin);
+        ctx.stroke();
+
+        // Подписи полюсов
+        ctx.font = 'bold 15px "Inter"';
+        ctx.fillStyle = '#1e293b';
+        // Экстраверсия (справа)
+        ctx.textAlign = 'right';
+        ctx.fillText('Экстраверсия', size - margin - 10, centerY - 15);
+        // Интроверсия (слева)
+        ctx.textAlign = 'left';
+        ctx.fillText('Интроверсия', margin + 10, centerY - 15);
+        // Нейротизм (сверху) – смещён вправо, чтобы не пересекать ось
+        ctx.textAlign = 'left';
+        ctx.fillText('Нейротизм', centerX + 20, margin + 20);
+        // Стабильность (снизу)
+        ctx.fillText('Стабильность', centerX + 20, size - margin - 12);
+
+        // Координаты центров квадрантов
+        const leftTop = { x: margin + qWidth/2, y: margin + qHeight/2 };
+        const rightTop = { x: centerX + qWidth/2, y: margin + qHeight/2 };
+        const leftBottom = { x: margin + qWidth/2, y: centerY + qHeight/2 };
+        const rightBottom = { x: centerX + qWidth/2, y: centerY + qHeight/2 };
+
+        function drawTemperament(title, traits, x, y, titleColor) {
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 15px "Inter"';
+            ctx.fillStyle = titleColor;
+            ctx.fillText(title, x, y - 32);
+            ctx.font = '500 12px "Inter"';
+            ctx.fillStyle = '#2d3748';
+            for (let i = 0; i < traits.length; i++) {
+                ctx.fillText(traits[i], x, y - 6 + i * 20);
+            }
+        }
+
+        drawTemperament('МЕЛАНХОЛИК', 
+                        ['тревожность, ригидность', 'пессимизм, замкнутость', 'ранимость, вдумчивость'],
+                        leftTop.x, leftTop.y, '#3498db');
+        drawTemperament('ХОЛЕРИК',
+                        ['вспыльчивость, страстность', 'импульсивность, лидерство', 'энергичность, нетерпение'],
+                        rightTop.x, rightTop.y, '#e74c3c');
+        drawTemperament('САНГВИНИК',
+                        ['общительность, оптимизм', 'активность, дружелюбие', 'легкость, отзывчивость'],
+                        rightBottom.x, rightBottom.y, '#f1c40f');
+        drawTemperament('ФЛЕГМАТИК',
+                        ['спокойствие, надёжность', 'уравновешенность, терпение', 'пассивность, сдержанность'],
+                        leftBottom.x, leftBottom.y, '#2ecc71');
+    }
+
+    window.addEventListener('load', drawEysenckCircle);
+</script>
+</body>
+</html>
