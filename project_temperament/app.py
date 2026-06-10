@@ -70,9 +70,9 @@ def question(q_id):
     """, (episode['id'],))
     options = cur.fetchall()                                                                # Получаем все варианты ответов для эпизода, возвращает список словарей
 
-    cur.execute("SELECT gender FROM auth.game_user_results WHERE id = %s", (session['user_result_id'],))
-    user = cur.fetchone()
-    gender = user['gender'] if user else 'не указан'
+    # cur.execute("SELECT gender FROM auth.game_user_results WHERE id = %s", (session['user_result_id'],))
+    # user = cur.fetchone()
+    # gender = user['gender'] if user else 'не указан'
 
     cur.close()
     conn.close()
@@ -83,8 +83,7 @@ def question(q_id):
                            options=options,
                            q_id=q_id,
                            total_questions=7,
-                           selected=selected_option,
-                           gender=gender)
+                           selected=selected_option)
 
 # Сохраняет ответ пользователя на текущий вопрос
 @app.route('/answer/<int:q_id>', methods=['POST'])
